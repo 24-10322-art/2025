@@ -1,2 +1,2 @@
 import streamlit as st
-st.title('나의 첫 streamlit!!!')
+st.title("서경's streamlit")
