@@ -53,8 +53,8 @@ if city:
     
     st.subheader(f"여행 도시: {city}, 국가: {data['국가']}")
     
-    # 이미지 표시 (PIL 없이 URL 직접 전달)
-    st.image(data["이미지"], caption=city, use_column_width=True)
+    # 이미지 표시 (최신 문법: use_container_width)
+    st.image(data["이미지"], caption=city, use_container_width=True)
     
     # 랜덤 날씨
     weather = random.choice(data["날씨"])
