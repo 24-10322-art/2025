@@ -2,7 +2,7 @@ import streamlit as st
 import random
 import pandas as pd
 
-# --- 데이터 정의 ---
+# --- 데이터 정의 (안전한 이미지 URL 사용) ---
 destinations = {
     "파리": {
         "국가": "프랑스",
@@ -18,7 +18,7 @@ destinations = {
         "명소": ["도쿄 타워", "센소지", "시부야 교차로"],
         "음식": ["스시", "라멘", "타코야끼"],
         "날씨": ["맑음", "비", "눈"],
-        "이미지": "https://upload.wikimedia.org/wikipedia/commons/1/11/Tokyo_Tower_and_around_Skyscrapers.jpg",
+        "이미지": "https://upload.wikimedia.org/wikipedia/commons/thumb/1/11/Tokyo_Tower_and_around_Skyscrapers.jpg/640px-Tokyo_Tower_and_around_Skyscrapers.jpg",
         "위도": 35.6762,
         "경도": 139.6503
     },
@@ -36,7 +36,7 @@ destinations = {
         "명소": ["빅벤", "타워 브리지", "버킹엄 궁전"],
         "음식": ["피쉬 앤 칩스", "애프터눈 티", "요크셔 푸딩"],
         "날씨": ["맑음", "비", "흐림", "안개"],
-        "이미지": "https://upload.wikimedia.org/wikipedia/commons/c/cd/London_Montage_L.jpg",
+        "이미지": "https://upload.wikimedia.org/wikipedia/commons/thumb/c/cd/London_Montage_L.jpg/640px-London_Montage_L.jpg",
         "위도": 51.5074,
         "경도": -0.1278
     }
@@ -53,7 +53,7 @@ if city:
     
     st.subheader(f"여행 도시: {city}, 국가: {data['국가']}")
     
-    # 이미지 표시 (최신 문법: use_container_width)
+    # 이미지 표시 (최신 문법)
     st.image(data["이미지"], caption=city, use_container_width=True)
     
     # 랜덤 날씨
