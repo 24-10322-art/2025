@@ -56,9 +56,12 @@ st.success(f"✨ 효과: {drink_info['효과']}")
 
 # 카페인 권장량 대비 퍼센트 계산
 percent = (drink_info['카페인(mg)'] / DAILY_LIMIT) * 100
-st.progress(min(100, percent))  # 100% 이상은 최대치 표시
+
+# ✅ st.progress()는 0~1 사이 값만 허용 → percent / 100
+st.progress(min(1.0, percent / 100))  
 st.write(f"☕ 하루 권장량 대비 **{percent:.1f}%** 섭취")
 
+# 경고 메시지
 if percent >= 100:
     st.error("🚨 하루 권장량을 초과했습니다! 주의하세요.")
 elif percent >= 70:
