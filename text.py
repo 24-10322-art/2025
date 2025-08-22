@@ -1,35 +1,39 @@
 import streamlit as st
 import pandas as pd
 
-# 학생들이 자주 마시는 에너지 음료 데이터 (mg 단위로 정리)
+# 학생들이 자주 마시는 에너지 음료 데이터 (mg 단위 + 이미지 URL)
 energy_drinks = {
     "핫식스 오리지널": {
         "카페인(mg)": 60,
         "타우린(mg)": 1000,
         "칼로리(kcal)": 120,
         "효과": "피로 회복, 집중력 향상 ⚡",
-        "용량": "250ml"
+        "용량": "250ml",
+        "이미지": "https://shopping-phinf.pstatic.net/main_8249771/82497719041.1.jpg"
     },
     "핫식스 더킹": {
         "카페인(mg)": 150,
         "타우린(mg)": 2000,
         "칼로리(kcal)": 170,
         "효과": "강력한 각성 효과 🚀",
-        "용량": "355ml"
+        "용량": "355ml",
+        "이미지": "https://shopping-phinf.pstatic.net/main_8249768/82497682733.2.jpg"
     },
     "몬스터 에너지 오리지널": {
         "카페인(mg)": 160,
         "타우린(mg)": 1000,
         "칼로리(kcal)": 210,
         "효과": "집중력 강화, 피로 감소 🔥",
-        "용량": "473ml"
+        "용량": "473ml",
+        "이미지": "https://shopping-phinf.pstatic.net/main_8249773/82497737464.2.jpg"
     },
     "몬스터 울트라(제로)": {
         "카페인(mg)": 140,
         "타우린(mg)": 1000,
         "칼로리(kcal)": 0,
         "효과": "칼로리 부담 없이 에너지 공급 💨",
-        "용량": "355ml"
+        "용량": "355ml",
+        "이미지": "https://shopping-phinf.pstatic.net/main_8249772/82497725342.1.jpg"
     }
 }
 
@@ -48,6 +52,11 @@ selected_drink = st.selectbox("에너지 음료를 선택하세요:", list(energ
 drink_info = energy_drinks[selected_drink]
 
 st.subheader(f"📌 {selected_drink}")
+
+# 👉 음료 사진 출력
+st.image(drink_info['이미지'], caption=selected_drink, width=200)
+
+# 성분 표시
 st.write(f"**용량:** {drink_info['용량']}")
 st.write(f"**카페인:** {drink_info['카페인(mg)']}mg")
 st.write(f"**타우린:** {drink_info['타우린(mg)']}mg")
@@ -56,8 +65,6 @@ st.success(f"✨ 효과: {drink_info['효과']}")
 
 # 카페인 권장량 대비 퍼센트 계산
 percent = (drink_info['카페인(mg)'] / DAILY_LIMIT) * 100
-
-# ✅ st.progress()는 0~1 사이 값만 허용 → percent / 100
 st.progress(min(1.0, percent / 100))  
 st.write(f"☕ 하루 권장량 대비 **{percent:.1f}%** 섭취")
 
@@ -69,5 +76,5 @@ elif percent >= 70:
 
 # 테이블로 전체 음료 보기
 if st.checkbox("📊 모든 음료 성분 비교하기"):
-    df = pd.DataFrame(energy_drinks).T
+    df = pd.DataFrame(energy_drinks).T.drop(columns=["이미지"])
     st.dataframe(df)
