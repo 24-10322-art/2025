@@ -1,9 +1,6 @@
 import streamlit as st
 import random
-from PIL import Image
-import requests
-from io import BytesIO
-import pydeck as pdk
+import pandas as pd
 
 # --- 데이터 정의 ---
 destinations = {
@@ -56,10 +53,8 @@ if city:
     
     st.subheader(f"여행 도시: {city}, 국가: {data['국가']}")
     
-    # 도시 이미지 표시
-    response = requests.get(data["이미지"])
-    img = Image.open(BytesIO(response.content))
-    st.image(img, caption=city, use_column_width=True)
+    # 이미지 표시 (PIL 없이 URL 직접 전달)
+    st.image(data["이미지"], caption=city, use_column_width=True)
     
     # 랜덤 날씨
     weather = random.choice(data["날씨"])
