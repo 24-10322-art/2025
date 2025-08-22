@@ -1,5 +1,6 @@
 import streamlit as st
 import pandas as pd
+import matplotlib.pyplot as plt
 
 # 학생들이 자주 마시는 에너지 음료 데이터 (mg 단위 + 이미지 URL)
 energy_drinks = {
@@ -59,8 +60,18 @@ st.success(f"✨ 효과: {drink_info['효과']}")
 
 # 카페인 권장량 대비 퍼센트 계산
 percent = (drink_info['카페인(mg)'] / DAILY_LIMIT) * 100
-st.progress(min(1.0, percent / 100))
 st.write(f"☕ 하루 권장량 대비 **{percent:.1f}%** 섭취")
+
+# 원그래프 시각화
+labels = ['섭취한 카페인', '남은 권장량']
+sizes = [min(drink_info['카페인(mg)'], DAILY_LIMIT), max(0, DAILY_LIMIT - drink_info['카페인(mg)'])]
+colors = ['#ff6347', '#90ee90']  # 빨강=섭취, 초록=남은
+explode = (0.1, 0)  # 첫 조각 강조
+
+fig, ax = plt.subplots()
+ax.pie(sizes, labels=labels, autopct='%1.1f%%', startangle=90, colors=colors, explode=explode, wedgeprops={'edgecolor':'white'})
+ax.axis('equal')  # 원형 유지
+st.pyplot(fig)
 
 # 경고 메시지 (학생 기준)
 if percent >= 100:
