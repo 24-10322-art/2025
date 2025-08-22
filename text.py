@@ -37,26 +37,20 @@ energy_drinks = {
     }
 }
 
-# 하루 카페인 권장량
-DAILY_LIMIT = 400  
+# 고2 학생 기준 하루 카페인 권장량
+DAILY_LIMIT = 120  
 
 # Streamlit UI
 st.title("🥤 학생들이 자주 마시는 에너지 음료 성분 & 효과")
 st.write("🔥 핫식스와 몬스터의 성분과 효과를 확인해보세요!")
-st.info("💡 성인 기준 하루 카페인 권장량은 400mg입니다.")
+st.info(f"💡 18세 학생 기준 하루 카페인 권장량은 {DAILY_LIMIT}mg입니다.")
 
 # 음료 선택
 selected_drink = st.selectbox("에너지 음료를 선택하세요:", list(energy_drinks.keys()))
-
-# 선택한 음료 데이터 표시
 drink_info = energy_drinks[selected_drink]
 
 st.subheader(f"📌 {selected_drink}")
-
-# 👉 음료 사진 출력
 st.image(drink_info['이미지'], caption=selected_drink, width=200)
-
-# 성분 표시
 st.write(f"**용량:** {drink_info['용량']}")
 st.write(f"**카페인:** {drink_info['카페인(mg)']}mg")
 st.write(f"**타우린:** {drink_info['타우린(mg)']}mg")
@@ -65,16 +59,31 @@ st.success(f"✨ 효과: {drink_info['효과']}")
 
 # 카페인 권장량 대비 퍼센트 계산
 percent = (drink_info['카페인(mg)'] / DAILY_LIMIT) * 100
-st.progress(min(1.0, percent / 100))  
+st.progress(min(1.0, percent / 100))
 st.write(f"☕ 하루 권장량 대비 **{percent:.1f}%** 섭취")
 
-# 경고 메시지
+# 경고 메시지 (학생 기준)
 if percent >= 100:
     st.error("🚨 하루 권장량을 초과했습니다! 주의하세요.")
 elif percent >= 70:
     st.warning("⚠️ 권장량의 70% 이상 섭취했습니다. 조심하세요!")
 
-# 테이블로 전체 음료 보기
-if st.checkbox("📊 모든 음료 성분 비교하기"):
-    df = pd.DataFrame(energy_drinks).T.drop(columns=["이미지"])
-    st.dataframe(df)
+# 테이블에 이미지 포함
+if st.checkbox("📊 모든 음료 성분 + 이미지 보기"):
+    st.markdown("### 전체 음료 비교")
+    table_html = "<table style='width:100%; border-collapse: collapse;'>"
+    table_html += "<tr><th>이미지</th><th>음료</th><th>카페인</th><th>타우린</th><th>칼로리</th><th>효과</th><th>용량</th></tr>"
+    
+    for name, info in energy_drinks.items():
+        table_html += f"<tr style='border-bottom:1px solid #ddd;'>"
+        table_html += f"<td><img src='{info['이미지']}' width='60'></td>"
+        table_html += f"<td>{name}</td>"
+        table_html += f"<td>{info['카페인(mg)']} mg</td>"
+        table_html += f"<td>{info['타우린(mg)']} mg</td>"
+        table_html += f"<td>{info['칼로리(kcal)']} kcal</td>"
+        table_html += f"<td>{info['효과']}</td>"
+        table_html += f"<td>{info['용량']}</td>"
+        table_html += "</tr>"
+    table_html += "</table>"
+    
+    st.markdown(table_html, unsafe_allow_html=True)
