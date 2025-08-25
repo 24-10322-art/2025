@@ -39,27 +39,27 @@ food_data = pd.DataFrame([
     {"name": "배양육", "taste_high": False, "taste_salty": False, "taste_sweet": False, 
      "texture_chewy": False, "texture_soft": True, "nutrition_protein": True, "nutrition_lowcal": False,
      "form_processed": True, "form_natural": False, "form_liquid": False,
-     "image": "배양육.jpeg"},
+    },
     
     {"name": "귀뚜라미바", "taste_high": True, "taste_salty": False, "taste_sweet": False,
      "texture_chewy": False, "texture_soft": True, "nutrition_protein": True, "nutrition_lowcal": True,
      "form_processed": True, "form_natural": False, "form_liquid": False,
-     "image": "귀뚜라미바.jpeg"},
+    },
     
     {"name": "아마란스", "taste_high": False, "taste_salty": False, "taste_sweet": False,
      "texture_chewy": False, "texture_soft": True, "nutrition_protein": False, "nutrition_lowcal": False,
      "form_processed": False, "form_natural": True, "form_liquid": False,
-     "image": "아마렌스.jpeg"},
+     },
     
     {"name": "굼벵이 호두파이", "taste_high": True, "taste_salty": False, "taste_sweet": True,
      "texture_chewy": True, "texture_soft": True, "nutrition_protein": True, "nutrition_lowcal": False,
      "form_processed": True, "form_natural": False, "form_liquid": False,
-     "image": "굼벵이 호두파이.jpeg"},
+    },
     
     {"name": "스피루리나", "taste_high": False, "taste_salty": False, "taste_sweet": False,
      "texture_chewy": False, "texture_soft": False, "nutrition_protein": True, "nutrition_lowcal": True,
      "form_processed": True, "form_natural": True, "form_liquid": True,
-     "image": "스피루니아.jpeg"},
+     },
 ])
 
 # 추천 점수 계산
