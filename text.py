@@ -1,5 +1,6 @@
 import streamlit as st
 import pydeck as pdk
+import time
 
 # 도시 데이터
 cities = [
@@ -7,8 +8,8 @@ cities = [
         "name": "London",
         "lat": 51.5074,
         "lon": -0.1278,
-        "image": "https://upload.wikimedia.org/wikipedia/commons/c/cd/London_Montage_L.jpg",
-        "desc": "런던은 영국의 수도로, 버킹엄 궁전, 빅벤, 런던 아이 등으로 유명합니다."
+        "image": "https://upload.wikimedia.org/wikipedia/commons/d/d6/London_Skyline_%28cropped%29.jpg",
+        "desc": "런던은 영국의 수도로, 역사와 현대가 공존하는 도시이며 세계적인 금융과 문화 중심지입니다."
     },
     {
         "name": "Tokyo",
@@ -33,29 +34,36 @@ cities = [
     },
 ]
 
-# 사이드바에서 도시 선택
+st.set_page_config(layout="wide")
 st.title("가상 세계 여행 시뮬레이터")
-selected_city = st.sidebar.radio("여행할 도시를 선택하세요", [c["name"] for c in cities])
 
-city = next((c for c in cities if c["name"] == selected_city), None)
+# 도시 선택
+selected_city = st.sidebar.radio("여행할 도시를 선택하세요", ["전체 보기"] + [c["name"] for c in cities])
 
-# 지구본 마커 시각화
+# 데이터 준비
 layer = pdk.Layer(
     "ScatterplotLayer",
     data=[{"position": [c["lon"], c["lat"]], "name": c["name"]} for c in cities],
     get_position="position",
     get_radius=200000,
-    get_fill_color=[255, 0, 0],
+    get_fill_color=[255, 0, 100],
     pickable=True,
 )
 
-view_state = pdk.ViewState(latitude=20, longitude=0, zoom=0.8, pitch=0)
-r = pdk.Deck(layers=[layer], initial_view_state=view_state, tooltip={"text": "{name}"})
-
-st.pydeck_chart(r, use_container_width=True)
-
-# 선택한 도시 정보 표시
-if city:
-    st.subheader(f"📍 {city['name']}")
-    st.image(city["image"], caption=city["name"], use_container_width=True)
-    st.write(city["desc"])
+if selected_city == "전체 보기":
+    # 초기 회전 애니메이션 (단순 구현: 위도 고정, 경도만 변화)
+    for lon in range(-180, 181, 30):
+        view_state = pdk.ViewState(latitude=20, longitude=lon, zoom=0.8, pitch=0)
+        r = pdk.Deck(layers=[layer], initial_view_state=view_state, tooltip={"text": "{name}"})
+        st.pydeck_chart(r, use_container_width=True)
+        time.sleep(0.1)
+else:
+    # 선택된 도시로 줌인
+    city = next((c for c in cities if c["name"] == selected_city), None)
+    if city:
+        view_state = pdk.ViewState(latitude=city["lat"], longitude=city["lon"], zoom=6, pitch=45)
+        r = pdk.Deck(layers=[layer], initial_view_state=view_state, tooltip={"text": "{name}"})
+        st.pydeck_chart(r, use_container_width=True)
+        st.subheader(f"📍 {city['name']}")
+        st.image(city["image"], caption=city["name"], use_container_width=True)
+        st.write(city["desc"])
