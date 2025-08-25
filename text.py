@@ -47,7 +47,9 @@ def recommend_food():
 if st.button("추천 받기"):
     top_food = recommend_food()
     st.subheader("🌟 당신에게 가장 잘 맞는 미래 식량 🌟")
+    # 이미지 표시
     st.image(top_food['image'], use_container_width=True)
+    # 주요 특징 표시
     st.markdown(f"### {top_food['name']}")
     st.markdown(f"- **맛:** {top_food['taste']}")
     st.markdown(f"- **식감:** {top_food['texture']}")
