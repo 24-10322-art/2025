@@ -1,9 +1,9 @@
 import streamlit as st
 import pandas as pd
 
-st.title("🌱 나만의 미래 식량 탐색 설문조사")
+st.title("🌱 나만의 미래 식량 추천")
 
-st.write("아래 설문에 답하면 AI가 당신에게 맞는 미래 식량을 추천합니다!")
+st.write("아래 설문에 답하면 AI가 당신에게 가장 잘 맞는 미래 식량을 추천합니다!")
 
 # 사용자 입력
 taste_pref = st.radio("1. 좋아하는 맛은?", ["고소함", "짭짤함", "단맛", "고기맛", "담백함"])
@@ -23,7 +23,7 @@ food_data = pd.DataFrame([
     {"name": "미래 식용 버섯(재배형 고단백 버섯)", "taste": "짭짤함", "texture": "쫄깃함", "nutrition": "단백질/미네랄", "eco": 5, "form": "자연 상태 그대로", "image": "https://upload.wikimedia.org/wikipedia/commons/1/11/Mushrooms.jpg"},
 ])
 
-# 추천 점수 계산
+# 추천 점수 계산 (Top 1)
 def recommend_food():
     scores = []
     for _, row in food_data.iterrows():
@@ -40,18 +40,17 @@ def recommend_food():
             score += 1
         scores.append(score)
     food_data["score"] = scores
-    return food_data.sort_values(by="score", ascending=False).head(3)
+    top_food = food_data.sort_values(by="score", ascending=False).iloc[0]
+    return top_food
 
 # 추천 결과 표시
 if st.button("추천 받기"):
-    recommendations = recommend_food()
-    st.subheader("🍽 추천 미래 식량 Top 3")
-    for _, food in recommendations.iterrows():
-        st.markdown(f"### {food['name']}")
-        st.image(food['image'], use_container_width=True)
-        st.markdown(f"- **맛:** {food['taste']}")
-        st.markdown(f"- **식감:** {food['texture']}")
-        st.markdown(f"- **영양 특징:** {food['nutrition']}")
-        st.markdown(f"- **선호 형태:** {food['form']}")
-        st.markdown(f"- **지속 가능성 점수:** {food['eco']}")
-        st.markdown("---")
+    top_food = recommend_food()
+    st.subheader("🌟 당신에게 가장 잘 맞는 미래 식량 🌟")
+    st.image(top_food['image'], use_container_width=True)
+    st.markdown(f"### {top_food['name']}")
+    st.markdown(f"- **맛:** {top_food['taste']}")
+    st.markdown(f"- **식감:** {top_food['texture']}")
+    st.markdown(f"- **영양 특징:** {top_food['nutrition']}")
+    st.markdown(f"- **선호 형태:** {top_food['form']}")
+    st.markdown(f"- **지속 가능성 점수:** {top_food['eco']}")
