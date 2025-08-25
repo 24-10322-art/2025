@@ -1,5 +1,5 @@
 import streamlit as st
-import numpy as np # 혹시 필요한 계산이 있다면 사용될 수 있어요!
+import numpy as np
 
 # Streamlit 페이지 설정
 st.set_page_config(
@@ -17,10 +17,22 @@ if 'user_name' not in st.session_state:
     st.session_state.user_name = ""
 if 'user_age' not in st.session_state:
     st.session_state.user_age = 0
-# ... 나머지 필요한 입력 값들도 이곳에서 초기화할 수 있습니다.
+if 'user_gender' not in st.session_state:
+    st.session_state.user_gender = "선택 안함" # 초기값 설정
+if 'caffeine_cans' not in st.session_state:
+    st.session_state.caffeine_cans = 0 # 초기값 설정
+if 'sleep_hours' not in st.session_state:
+    st.session_state.sleep_hours = 0.0 # 초기값 설정
+if 'activity_level' not in st.session_state:
+    st.session_state.activity_level = "보통 (규칙적인 활동)" # 초기값 설정
+if 'caffeine_sensitivity' not in st.session_state:
+    st.session_state.caffeine_sensitivity = "보통 (적당히 효과 봄)" # 초기값 설정
+if 'past_experience' not in st.session_state:
+    st.session_state.past_experience = [] # 초기값 설정
+
 
 # --------------------------------------------------------------------------------
-# AI 시뮬레이션 함수 (규칙 기반) - 코드가 길어 먼저 정의해 둡니다.
+# AI 시뮬레이션 함수 (규칙 기반)
 # --------------------------------------------------------------------------------
 def simulate_energy_drink_effect(
     caffeine_cans, sleep_hours, activity_level, caffeine_sensitivity, past_experience, user_age, user_gender
@@ -156,12 +168,18 @@ st.markdown("---")
 if not st.session_state.survey_completed:
     # 0. 사용자 정보 입력
     st.header("📝 당신의 정보를 알려주세요! 😊")
+    
     # key를 지정하여 Session State에 값을 저장하고 불러올 수 있도록 합니다.
     # 사용자가 이름을 입력하지 않으면 '사용자'로 기본 설정됩니다.
-    user_name_input = st.text_input("이름을 입력해주세요:", placeholder="예: 홍길동", key="survey_name_input")
-    st.session_state.user_name = user_name_input if user_name_input else "사용자"
+    st.session_state.user_name = st.text_input(
+        "이름을 입력해주세요:", placeholder="예: 홍길동", key="survey_name_input"
+    )
+    if not st.session_state.user_name: # 이름이 입력되지 않았을 때 기본값 설정
+        display_user_name = "사용자"
+    else:
+        display_user_name = st.session_state.user_name
 
-    st.write(f"안녕하세요, **{st.session_state.user_name}님!** ✨ 에너지 음료가 {st.session_state.user_name}님에게 어떤 영향을 줄지, 과학과 AI의 힘을 빌려 함께 탐구해볼까요?")
+    st.write(f"안녕하세요, **{display_user_name}님!** ✨ 에너지 음료가 {display_user_name}님에게 어떤 영향을 줄지, 과학과 AI의 힘을 빌려 함께 탐구해볼까요?")
     st.write(f"정확한 분석을 위해 몇 가지 질문에 답해주세요. 😊")
 
     st.markdown("---")
@@ -169,14 +187,13 @@ if not st.session_state.survey_completed:
     # 1. 설문 항목 입력
     st.header("1️⃣ 에너지 음료 섭취 습관 및 건강 정보 설문")
 
-    # 모든 입력 위젯에 고유한 'key'를 부여하여 session_state와 연동합니다.
     st.session_state.user_age = st.slider(
-        f"{st.session_state.user_name}님은 몇 살이신가요? 🎂 (만 나이)",
+        f"{display_user_name}님은 몇 살이신가요? 🎂 (만 나이)",
         min_value=12, max_value=60, value=18, key="survey_age"
     )
 
     st.session_state.user_gender = st.radio(
-        f"{st.session_state.user_name}님의 성별은 무엇인가요? 🚻",
+        f"{display_user_name}님의 성별은 무엇인가요? 🚻",
         ["여성", "남성", "선택 안함"], key="survey_gender"
     )
 
@@ -196,7 +213,7 @@ if not st.session_state.survey_completed:
     )
 
     st.session_state.caffeine_sensitivity = st.selectbox(
-        f"{st.session_state.user_name}님은 평소 카페인에 얼마나 민감하신가요? 🤔",
+        f"{display_user_name}님은 평소 카페인에 얼마나 민감하신가요? 🤔",
         ["매우 민감함 (소량에도 반응)", "보통 (적당히 효과 봄)", "둔감함 (많이 마셔도 잘 모르겠음)"], key="survey_caffeine_sensitivity"
     )
 
@@ -209,17 +226,25 @@ if not st.session_state.survey_completed:
 
     # 설문 완료 버튼
     if st.button("설문 완료하고 결과 보기! 🚀", key="submit_survey"):
-        if not st.session_state.survey_name_input:
+        # 이름이 입력되지 않았을 경우 에러 메시지 출력
+        if not st.session_state.user_name:
             st.error("앗! 먼저 이름을 입력해 주세요! 😊")
+        # 나이가 12세 미만일 경우 경고
         elif st.session_state.user_age < 12:
-            st.warning(f"{st.session_state.user_name}님, {st.session_state.user_age}세에게는 에너지 음료 섭취가 권장되지 않아요. 이 앱은 12세 이상을 기준으로 시뮬레이션됩니다. 건강이 가장 중요해요! 💪")
+            st.warning(f"{display_user_name}님, {st.session_state.user_age}세에게는 에너지 음료 섭취가 권장되지 않아요. 이 앱은 12세 이상을 기준으로 시뮬레이션됩니다. 건강이 가장 중요해요! 💪")
         else:
             # 모든 검증을 통과하면 설문 완료 상태로 변경하고 페이지를 새로고침하여 결과를 보여줍니다.
             st.session_state.survey_completed = True
-            st.rerun() # <<< 여기! st.experimental_rerun() 대신 st.rerun()을 사용합니다. >>>
+            st.rerun() # <<< 수정된 부분 >>>
 
 # 설문이 완료되었을 때 (결과 화면)
 else:
+    # user_name이 None일 수 있으므로 다시 확인 (새로고침 시 발생 가능성)
+    if not st.session_state.user_name:
+        display_user_name = "사용자"
+    else:
+        display_user_name = st.session_state.user_name
+
     # 2. 과학적 설명 섹션
     st.header("2️⃣ 에너지 음료, 과학적으로 파헤쳐볼까요? 🔬")
 
@@ -237,7 +262,7 @@ else:
         *   **임산부, 심혈관 질환자 등:** 섭취량을 더욱 제한해야 합니다.
         """
     )
-    st.write(f"**{st.session_state.user_name}님**의 나이({st.session_state.user_age}세)를 고려했을 때, ")
+    st.write(f"**{display_user_name}님**의 나이({st.session_state.user_age}세)를 고려했을 때, ")
     if st.session_state.user_age >= 18:
         st.info("성인 권장량인 **하루 최대 400mg**을 기준으로 시뮬레이션됩니다.")
     else:
@@ -259,7 +284,7 @@ else:
     st.markdown("---")
 
     # 3. AI 예측 결과 섹션
-    st.header(f"3️⃣ AI 예측 결과: {st.session_state.user_name}님께 예상되는 반응은? 📊")
+    st.header(f"3️⃣ AI 예측 결과: {display_user_name}님께 예상되는 반응은? 📊")
 
     st.write("분석 중입니다... 잠시만 기다려주세요! ⏳")
     results, warnings, _ = simulate_energy_drink_effect(
@@ -269,7 +294,7 @@ else:
     )
 
     if st.session_state.caffeine_cans == 0:
-        st.success(f"에너지 음료를 섭취하지 않으셨네요, {st.session_state.user_name}님! 오늘 {st.session_state.user_name}님의 건강을 위한 멋진 선택이에요! 😊")
+        st.success(f"에너지 음료를 섭취하지 않으셨네요, {display_user_name}님! 오늘 {display_user_name}님의 건강을 위한 멋진 선택이에요! 😊")
     else:
         st.subheader("📝 예상되는 주요 효과 및 결과")
         for res in results:
@@ -280,19 +305,19 @@ else:
             for warn in warnings:
                 st.warning(warn)
         else:
-            st.success(f"{st.session_state.user_name}님, 대체로 큰 부작용 없이 에너지 음료의 긍정적인 효과를 기대할 수 있을 것 같아요! 그래도 과도한 섭취는 좋지 않답니다! 😉")
+            st.success(f"{display_user_name}님, 대체로 큰 부작용 없이 에너지 음료의 긍정적인 효과를 기대할 수 있을 것 같아요! 그래도 과도한 섭취는 좋지 않답니다! 😉")
 
         st.write(
             f"이 시뮬레이션은 입력된 데이터와 과학적 원리를 기반으로 한 예측이며, "
             f"개인의 실제 반응은 다양한 요인에 따라 다를 수 있습니다. "
-            f"**{st.session_state.user_name}님**의 몸이 보내는 신호에 귀 기울이는 것이 가장 중요해요! 💖"
+            f"**{display_user_name}님**의 몸이 보내는 신호에 귀 기울이는 것이 가장 중요해요! 💖"
         )
     
     st.markdown("---")
     # 다시 설문하기 버튼 추가 (결과를 본 후 다시 처음으로 돌아가고 싶을 때)
     if st.button("다시 설문하기"):
         st.session_state.survey_completed = False # 설문 완료 상태를 False로 되돌리고
-        st.rerun() # <<< 여기도! st.experimental_rerun() 대신 st.rerun()을 사용합니다. >>>
+        st.rerun() # <<< 수정된 부분 >>>
 
 st.markdown("---")
-st.write(f"**{st.session_state.user_name}님**의 탐구 정신과 열정에 박수를 보냅니다! 웹앱 개발도 분명 잘 해내실 거예요! 화이팅! 💪😊")
+st.write(f"**{display_user_name}님**의 탐구 정신과 열정에 박수를 보냅니다! 웹앱 개발도 분명 잘 해내실 거예요! 화이팅! 💪😊")
