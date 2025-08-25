@@ -33,7 +33,6 @@ if not st.session_state.show_result:
 
     if st.button("추천 받기"):
         st.session_state.show_result = True
-        st.experimental_rerun()  # 다음 화면으로 이동
 
 # 미래 식량 후보 데이터
 food_data = pd.DataFrame([
@@ -90,4 +89,3 @@ if st.session_state.show_result:
     
     if st.button("다시 퀴즈 풀기"):
         st.session_state.show_result = False
-        st.experimental_rerun()
