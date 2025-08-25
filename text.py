@@ -1,43 +1,76 @@
 import streamlit as st
 import pandas as pd
+import matplotlib.pyplot as plt
 
-st.title("🌱 나만의 미래 식량 추천")
+st.title("🌱 OX 퀴즈로 찾는 나만의 미래 식량 (확장판)")
 
-st.write("아래 설문에 답하면 AI가 당신에게 가장 잘 맞는 미래 식량을 추천합니다!")
+st.write("각 질문에 O(맞다)/X(틀리다)로 답하면 AI가 당신에게 가장 잘 맞는 미래 식량을 추천합니다!")
 
-# 사용자 입력
-taste_pref = st.radio("1. 좋아하는 맛은?", ["고소함", "짭짤함", "단맛", "고기맛", "담백함"])
-texture_pref = st.radio("2. 좋아하는 식감은?", ["바삭함", "쫄깃함", "부드러움", "살짝 씹히는 맛"])
-nutrition_pref = st.multiselect("3. 중요하게 생각하는 영양소는?", ["단백질 풍부", "미네랄 풍부", "저칼로리", "탄수화물 풍부", "비타민 풍부"])
-eco_pref = st.slider("4. 환경과 지속 가능성을 얼마나 중요하게 생각하나요?", 1, 5, 3)
-form_pref = st.selectbox("5. 선호하는 식량 형태는?", ["자연 상태 그대로", "가공식품 형태", "스낵/바 형태", "음료/액체 형태"])
+# OX 퀴즈 질문 10개
+quiz_questions = {
+    "고소한 맛을 좋아한다": "taste_high",
+    "짭짤한 맛을 좋아한다": "taste_salty",
+    "단맛을 좋아한다": "taste_sweet",
+    "쫄깃한 식감을 좋아한다": "texture_chewy",
+    "부드러운 식감을 좋아한다": "texture_soft",
+    "단백질이 풍부한 식품을 선호한다": "nutrition_protein",
+    "저칼로리 식품을 좋아한다": "nutrition_lowcal",
+    "가공식품 형태를 선호한다": "form_processed",
+    "자연 상태 그대로 식품을 좋아한다": "form_natural",
+    "음료/액체 형태를 선호한다": "form_liquid"
+}
+
+# 사용자 OX 선택
+user_answers = {}
+for q in quiz_questions:
+    user_answers[quiz_questions[q]] = st.radio(q, ["O", "X"], horizontal=True)
 
 # 미래 식량 후보 데이터
 food_data = pd.DataFrame([
-    {"name": "귀뚜라미 단백질", "taste": "고소함", "texture": "바삭함", "nutrition": "단백질 풍부", "eco": 5, "form": "스낵/바 형태", "image": "https://upload.wikimedia.org/wikipedia/commons/1/13/Edible_insects.jpg"},
-    {"name": "해조류(김, 다시마 등)", "taste": "짭짤함", "texture": "쫄깃함", "nutrition": "미네랄 풍부", "eco": 4, "form": "자연 상태 그대로", "image": "https://upload.wikimedia.org/wikipedia/commons/e/e7/Seaweed_on_shore.jpg"},
-    {"name": "배양육(실험실에서 배양한 고기)", "taste": "고기맛", "texture": "부드러움", "nutrition": "단백질 풍부", "eco": 3, "form": "가공식품 형태", "image": "https://upload.wikimedia.org/wikipedia/commons/2/23/Cultured_meat.jpg"},
-    {"name": "곤약 기반 대체 식품", "taste": "담백함", "texture": "쫄깃함", "nutrition": "저칼로리", "eco": 4, "form": "가공식품 형태", "image": "https://upload.wikimedia.org/wikipedia/commons/8/8b/Konjac_jelly.jpg"},
-    {"name": "곡물 기반 미래 식품(퀴노아, 아마란스 등)", "taste": "담백함", "texture": "부드러움", "nutrition": "탄수화물 풍부", "eco": 4, "form": "자연 상태 그대로", "image": "https://upload.wikimedia.org/wikipedia/commons/4/4c/Grain_on_plate.jpg"},
-    {"name": "곤충 단백질 바(밀웜, 귀뚜라미 포함)", "taste": "고소함", "texture": "부드러움", "nutrition": "단백질 풍부", "eco": 5, "form": "스낵/바 형태", "image": "https://upload.wikimedia.org/wikipedia/commons/1/19/Cricket_energy_bar.jpg"},
-    {"name": "미래 식용 버섯(재배형 고단백 버섯)", "taste": "짭짤함", "texture": "쫄깃함", "nutrition": "단백질/미네랄", "eco": 5, "form": "자연 상태 그대로", "image": "https://upload.wikimedia.org/wikipedia/commons/1/11/Mushrooms.jpg"},
+    {"name": "귀뚜라미 단백질", "taste_high": True, "taste_salty": False, "taste_sweet": False, 
+     "texture_chewy": False, "texture_soft": False, "nutrition_protein": True, "nutrition_lowcal": False,
+     "form_processed": True, "form_natural": False, "form_liquid": False,
+     "image": "https://upload.wikimedia.org/wikipedia/commons/1/13/Edible_insects.jpg"},
+    
+    {"name": "해조류(김, 다시마 등)", "taste_high": False, "taste_salty": True, "taste_sweet": False,
+     "texture_chewy": True, "texture_soft": False, "nutrition_protein": False, "nutrition_lowcal": True,
+     "form_processed": False, "form_natural": True, "form_liquid": False,
+     "image": "https://upload.wikimedia.org/wikipedia/commons/e/e7/Seaweed_on_shore.jpg"},
+    
+    {"name": "배양육", "taste_high": False, "taste_salty": False, "taste_sweet": False,
+     "texture_chewy": False, "texture_soft": True, "nutrition_protein": True, "nutrition_lowcal": False,
+     "form_processed": True, "form_natural": False, "form_liquid": False,
+     "image": "https://upload.wikimedia.org/wikipedia/commons/2/23/Cultured_meat.jpg"},
+    
+    {"name": "곤약 기반 대체 식품", "taste_high": False, "taste_salty": False, "taste_sweet": False,
+     "texture_chewy": True, "texture_soft": False, "nutrition_protein": False, "nutrition_lowcal": True,
+     "form_processed": True, "form_natural": False, "form_liquid": False,
+     "image": "https://upload.wikimedia.org/wikipedia/commons/8/8b/Konjac_jelly.jpg"},
+    
+    {"name": "곡물 기반 미래 식품", "taste_high": False, "taste_salty": False, "taste_sweet": False,
+     "texture_chewy": False, "texture_soft": True, "nutrition_protein": False, "nutrition_lowcal": False,
+     "form_processed": False, "form_natural": True, "form_liquid": False,
+     "image": "https://upload.wikimedia.org/wikipedia/commons/4/4c/Grain_on_plate.jpg"},
+    
+    {"name": "곤충 단백질 바", "taste_high": True, "taste_salty": False, "taste_sweet": False,
+     "texture_chewy": False, "texture_soft": True, "nutrition_protein": True, "nutrition_lowcal": False,
+     "form_processed": True, "form_natural": False, "form_liquid": False,
+     "image": "https://upload.wikimedia.org/wikipedia/commons/1/19/Cricket_energy_bar.jpg"},
+    
+    {"name": "미래 식용 버섯", "taste_high": False, "taste_salty": True, "taste_sweet": False,
+     "texture_chewy": True, "texture_soft": False, "nutrition_protein": True, "nutrition_lowcal": False,
+     "form_processed": False, "form_natural": True, "form_liquid": False,
+     "image": "https://upload.wikimedia.org/wikipedia/commons/1/11/Mushrooms.jpg"},
 ])
 
-# 추천 점수 계산 (Top 1)
+# 추천 점수 계산
 def recommend_food():
     scores = []
     for _, row in food_data.iterrows():
         score = 0
-        if row["taste"] == taste_pref:
-            score += 2
-        if row["texture"] == texture_pref:
-            score += 2
-        for n in nutrition_pref:
-            if n in row["nutrition"]:
+        for key, answer in user_answers.items():
+            if (answer == "O" and row[key]) or (answer == "X" and not row[key]):
                 score += 1
-        score += min(eco_pref, row["eco"])
-        if row["form"] == form_pref:
-            score += 1
         scores.append(score)
     food_data["score"] = scores
     top_food = food_data.sort_values(by="score", ascending=False).iloc[0]
@@ -46,13 +79,22 @@ def recommend_food():
 # 추천 결과 표시
 if st.button("추천 받기"):
     top_food = recommend_food()
-    st.subheader("🌟 당신에게 가장 잘 맞는 미래 식량 🌟")
-    # 이미지 표시
+    
+    # 카드형 UI
+    st.markdown("### 🌟 당신에게 가장 잘 맞는 미래 식량 🌟")
     st.image(top_food['image'], use_container_width=True)
-    # 주요 특징 표시
     st.markdown(f"### {top_food['name']}")
-    st.markdown(f"- **맛:** {top_food['taste']}")
-    st.markdown(f"- **식감:** {top_food['texture']}")
-    st.markdown(f"- **영양 특징:** {top_food['nutrition']}")
-    st.markdown(f"- **선호 형태:** {top_food['form']}")
-    st.markdown(f"- **지속 가능성 점수:** {top_food['eco']}")
+    st.markdown("**특징:**")
+    for key, val in top_food.items():
+        if val and key not in ["name", "image", "score"]:
+            # 질문 텍스트로 매핑
+            question_text = [q for q, k in quiz_questions.items() if k == key][0]
+            st.markdown(f"- {question_text}")
+
+    # 점수 시각화 (OX 적합도)
+    st.markdown("### 점수 시각화")
+    fig, ax = plt.subplots()
+    ax.barh([top_food['name']], [top_food['score']], color='green')
+    ax.set_xlim(0, len(quiz_questions))
+    ax.set_xlabel("OX 적합 점수")
+    st.pyplot(fig)
