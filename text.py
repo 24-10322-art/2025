@@ -8,7 +8,7 @@ st.write("각 질문에 O(맞다)/X(틀리다)로 답하면 AI가 당신에게 �
 if "show_result" not in st.session_state:
     st.session_state.show_result = False
 
-# OX 퀴즈 질문 10개
+# OX 퀴즈 질문
 quiz_questions = {
     "고소한 맛을 좋아한다": "taste_high",
     "짭짤한 맛을 좋아한다": "taste_salty",
@@ -34,32 +34,32 @@ if not st.session_state.show_result:
     if st.button("추천 받기"):
         st.session_state.show_result = True
 
-# 미래 식량 후보 데이터
+# 미래 식량 후보 데이터 (로컬 이미지 사용)
 food_data = pd.DataFrame([
     {"name": "배양육", "taste_high": False, "taste_salty": False, "taste_sweet": False, 
      "texture_chewy": False, "texture_soft": True, "nutrition_protein": True, "nutrition_lowcal": False,
      "form_processed": True, "form_natural": False, "form_liquid": False,
-     "image": "https://upload.wikimedia.org/wikipedia/commons/2/23/Cultured_meat.jpg"},
+     "image": "배양육.jpeg"},
     
     {"name": "귀뚜라미바", "taste_high": True, "taste_salty": False, "taste_sweet": False,
      "texture_chewy": False, "texture_soft": True, "nutrition_protein": True, "nutrition_lowcal": True,
      "form_processed": True, "form_natural": False, "form_liquid": False,
-     "image": "https://upload.wikimedia.org/wikipedia/commons/1/19/Cricket_energy_bar.jpg"},
+     "image": "귀뚜라미바.jpeg"},
     
     {"name": "아마란스", "taste_high": False, "taste_salty": False, "taste_sweet": False,
      "texture_chewy": False, "texture_soft": True, "nutrition_protein": False, "nutrition_lowcal": False,
      "form_processed": False, "form_natural": True, "form_liquid": False,
-     "image": "https://upload.wikimedia.org/wikipedia/commons/4/4c/Grain_on_plate.jpg"},
+     "image": "아마렌스.jpeg"},
     
     {"name": "굼벵이 호두파이", "taste_high": True, "taste_salty": False, "taste_sweet": True,
      "texture_chewy": True, "texture_soft": True, "nutrition_protein": True, "nutrition_lowcal": False,
      "form_processed": True, "form_natural": False, "form_liquid": False,
-     "image": "https://upload.wikimedia.org/wikipedia/commons/1/13/Edible_insects.jpg"},
+     "image": "굼벵이 호두파이.jpeg"},
     
     {"name": "스피루리나", "taste_high": False, "taste_salty": False, "taste_sweet": False,
      "texture_chewy": False, "texture_soft": False, "nutrition_protein": True, "nutrition_lowcal": True,
      "form_processed": True, "form_natural": True, "form_liquid": True,
-     "image": "https://upload.wikimedia.org/wikipedia/commons/6/6f/Spirulina_dried_powder.jpg"},
+     "image": "스피루니아.jpeg"},
 ])
 
 # 추천 점수 계산
@@ -79,7 +79,7 @@ def recommend_food(user_answers):
 if st.session_state.show_result:
     top_food = recommend_food(st.session_state.user_answers)
     st.subheader("🌟 당신에게 가장 잘 맞는 미래 식량 🌟")
-    st.image(top_food['image'], use_container_width=True)
+    st.image(f"./{top_food['image']}", use_container_width=True)
     st.markdown(f"### {top_food['name']}")
     st.markdown("**특징:**")
     for key, val in top_food.items():
