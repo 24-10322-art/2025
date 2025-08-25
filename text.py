@@ -1,4 +1,5 @@
 import streamlit as st
+import numpy as np # 숫자를 다룰 때 사용할 수 있어요!
 
 # Streamlit 페이지 설정
 st.set_page_config(
@@ -18,12 +19,15 @@ if 'mood_answers' not in st.session_state:
 # 최종 기분 점수 및 분류 초기화
 if 'mood_score' not in st.session_state:
     st.session_state.mood_score = 0
-if 'identified_mood' not in st.session_state:
-    st.session_state.identified_mood = ""
+# identified_mood는 함수에서 반환받아 사용하거나, 필요한 시점에 저장하도록 로직 변경
+# if 'identified_mood' not in st.session_state:
+#     st.session_state.identified_mood = ""
 
 # --- 음악 추천 로직 (감정 분류 및 추천) ---
-# 이 부분은 나중에 더 정교하게 다듬을 수 있어요!
+# 이제 get_music_recommendation 함수가 identified_mood도 반환하도록 변경합니다.
 def get_music_recommendation(mood_score):
+    mood_label = "" # 초기화
+    
     if mood_score >= 8:
         mood_label = "최고의 활기찬 기분"
         music_info = {
@@ -52,7 +56,7 @@ def get_music_recommendation(mood_score):
             "mood": "차분한",
             "desc": "복잡하지 않고 차분한 마음 상태이시군요. 편안하게 휴식을 취하거나 집중할 수 있는 음악이 필요하실 것 같아요.",
             "tracks": [
-                {"title": "고민보다 GO", "artist": "방탄소년단", "youtube_link": "https://www.youtube.com/watch?v=d_ZfB6jWvXo"}, # 평온하거나 휴식을 위할 때 듣는 곡으로 변경 필요
+                {"title": "Forest", "artist": "Cho Hyungwoo", "youtube_link": "https://www.youtube.com/watch?v=o04_sWJ_XpI"}, # 예시 곡 변경
                 {"title": "River Flows in You", "artist": "Yiruma", "youtube_link": "https://www.youtube.com/watch?v=7M7b0eYf06c"},
                 {"title": "Clair de Lune", "artist": "Claude Debussy", "youtube_link": "https://www.youtube.com/watch?v=EAJdCgU6D0I"}
             ]
@@ -74,14 +78,15 @@ def get_music_recommendation(mood_score):
             "mood": "공감",
             "desc": "지금 많이 힘든 기분이시군요... 괜찮아요. 혼자가 아니에요. 이 음악들이 작은 위안이 되기를 바라요.",
             "tracks": [
-                {"title": "Into the Unknown", "artist": "Idina Menzel, Aurora", "youtube_link": "https://www.youtube.com/watch?v=nrD7yE6yLzY"},
+                {"title": "Lonely", "artist": "2NE1", "youtube_link": "https://www.youtube.com/watch?v=cn0s1g3_NqM"}, # 예시 곡 변경
                 {"title": "Mad World", "artist": "Gary Jules", "youtube_link": "https://www.youtube.com/watch?v=4N3N1MlmPLw"},
                 {"title": "고백", "artist": "Melomance", "youtube_link": "https://www.youtube.com/watch?v=eEaYs-S_YFw"}
             ]
         }
     
-    st.session_state.identified_mood = mood_label
-    return music_info
+    # identified_mood를 반환 값에 포함
+    return music_info, mood_label
+
 
 # --- 웹앱의 기본 타이틀 ---
 st.title("🎶 AI 기반 오늘의 기분 맞춤형 음악 추천")
@@ -129,13 +134,13 @@ if not st.session_state.survey_completed:
     ]
 
     # 사용자 답변을 저장할 딕셔너리
-    st.session_state.mood_answers = {}
+    # st.session_state.mood_answers = {} # 이미 초기화되어 있으므로 주석 처리
     
     # 각 질문 표시 및 답변 받기
     for i, q_data in enumerate(questions):
-        # 라디오 버튼의 옵션 순서 유지 (dictionary는 순서가 보장되지 않을 수 있으므로)
         options_list = list(q_data["options"].keys())
-        selected_option = st.radio(q_data["q"], options_list, key=f"q_{i}")
+        # 각 질문에 고유한 key를 부여하여 상태 관리
+        selected_option = st.radio(q_data["q"], options_list, key=f"q_{i}_radio", index=options_list.index(list(q_data["options"].keys())[2])) # 기본값을 보통으로 설정 (인덱스 2)
         st.session_state.mood_answers[f"q_{i}"] = q_data["options"][selected_option]
         st.markdown("---") # 질문 사이에 구분선 추가
 
@@ -158,17 +163,22 @@ else:
     st.write("뇌과학 AI가 분석한 {name}님의 기분과 맞춤형 음악 추천입니다!".format(name=display_user_name))
     st.markdown("---")
 
-    music_recommendation = get_music_recommendation(st.session_state.mood_score)
+    # get_music_recommendation 함수에서 music_info와 mood_label을 함께 반환받음
+    music_recommendation, identified_mood_label = get_music_recommendation(st.session_state.mood_score)
 
-    st.subheader(f"✨ 오늘의 기분: {st.session_state.identified_mood}")
+    st.subheader(f"✨ 오늘의 기분: {identified_mood_label}") # 반환받은 mood_label 사용
     st.write(music_recommendation["desc"])
     
     st.markdown("---")
     st.subheader("🎵 추천 음악 리스트")
-    for track in music_recommendation["tracks"]:
-        st.write(f"**{track['title']}** - {track['artist']}")
-        st.markdown(f"[Youtube에서 듣기]({track['youtube_link']})") # 링크로 제공
-        st.markdown("---")
+    # 음악 리스트가 비어있지 않은지 확인
+    if music_recommendation and music_recommendation["tracks"]:
+        for track in music_recommendation["tracks"]:
+            st.write(f"**{track['title']}** - {track['artist']}")
+            st.markdown(f"[Youtube에서 듣기]({track['youtube_link']})") # 링크로 제공
+            st.markdown("---")
+    else:
+        st.info("아쉽게도 추천할 수 있는 음악이 없네요 😥") # 혹시 모를 상황 대비
 
     st.markdown("---")
     st.header("3️⃣ 뇌과학적 원리: 음악이 기분에 미치는 영향 뇌 활동 변화 🔬")
@@ -177,19 +187,20 @@ else:
         "기억을 활성화하며, 심지어 신체 반응까지 변화시킬 수 있는 강력한 도구랍니다."
     )
     
-    if st.session_state.identified_mood == "최고의 활기찬 기분" or st.session_state.identified_mood == "긍정적이고 활기찬 기분":
+    # 뇌과학 설명도 반환받은 mood_label에 따라 동적으로 표시
+    if identified_mood_label == "최고의 활기찬 기분" or identified_mood_label == "긍정적이고 활기찬 기분":
         st.info(
             "이런 활기찬 음악은 뇌의 **도파민 보상 시스템**을 활성화시켜 즐거움과 만족감을 높여줍니다. "
             "또한, **청각 피질**과 연결된 **운동 피질**도 자극하여 신체 활동을 촉진하고 에너지를 증진시키는 데 도움을 줍니다. "
             "빠른 템포와 밝은 멜로디는 **뇌의 베타파**를 증가시켜 집중력과 각성 상태를 유지하는 데도 기여할 수 있어요."
         )
-    elif st.session_state.identified_mood == "차분하거나 평온한 기분":
+    elif identified_mood_label == "차분하거나 평온한 기분":
         st.info(
             "차분한 음악은 **뇌의 전전두피질** 활동을 도와 감정 조절 능력을 향상시키고, **알파파** 생성을 촉진하여 "
             "마음을 안정시키고 스트레스를 줄이는 데 효과적입니다. "
             "부교감 신경계를 활성화하여 심박수와 혈압을 낮추는 등 신체적 이완에도 도움을 줍니다."
         )
-    elif st.session_state.identified_mood == "조금 지치거나 답답한 기분" or st.session_state.identified_mood == "매우 우울하거나 힘든 기분":
+    elif identified_mood_label == "조금 지치거나 답답한 기분" or identified_mood_label == "매우 우울하거나 힘든 기분":
         st.info(
             "이러한 위로와 공감의 음악은 뇌의 **변연계**와 **전전두피질**을 자극하여 감정적인 처리와 회복을 돕습니다. "
             "슬픈 음악이 오히려 마음을 편안하게 하는 '카타르시스' 효과는 **옥시토신**과 같은 호르몬 분비와도 관련이 있어요. "
@@ -202,7 +213,7 @@ else:
         st.session_state.survey_completed = False # 설문 완료 상태를 False로 되돌리고
         st.session_state.mood_answers = {} # 답변 초기화
         st.session_state.mood_score = 0 # 점수 초기화
-        st.session_state.identified_mood = "" # 기분 초기화
+        # st.session_state.identified_mood = "" # 이 부분은 이제 필요없거나 get_music_recommendation에서 직접 받아씀
         st.rerun()
 
 st.markdown("---")
